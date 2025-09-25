@@ -1,8 +1,12 @@
 import socket, struct, json
+import Smap_Analysis #自製的解析庫位模組
 
 STATUS_PORT = 19204
+CONFIG_PORT = 19207
+
 CONNECT_TIMEOUT = 1
 MSGTYPE_INFO = 1000  # robot_status_info_req
+MSGTYPE_DOWNLOADMAP = 0x0FAB   # 4011 robot_config_downloadmap_req
 
 #搜尋網段用
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -61,3 +65,19 @@ class Api:
                 except Exception:
                     pass
         return results
+
+
+    def download_map(self, ip: str, map_name: str = "default"):
+        try:
+            resp = _send_recv(ip, CONFIG_PORT, MSGTYPE_DOWNLOADMAP, {"map_name": map_name})
+            return {"ok": True, "map": resp}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
+    def get_bins(self, ip: str, map_name: str = "default"):
+        res = self.download_map(ip, map_name)
+        if not res.get("ok"):
+            return res
+        smap = res["map"]
+        bins = Smap_Analysis.parse_bins_actions(smap)
+        return {"ok": True, "bins": bins}

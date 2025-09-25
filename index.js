@@ -37,10 +37,26 @@ window.addEventListener("DOMContentLoaded", () => {
             <div class="col id">${info.vehicle_id}</div>
             <div class="col model">${info.model}</div>
             <div class="col map">${info.map}</div>
-            <div class="col action"><button class="btn">連線</button></div>
+            <div class="col action">
+            <button class="btn connect-btn" data-ip="${info.ip}">連線</button>
+            </div>
           `;
           agvList.appendChild(row);
         });
+
+        // 綁定所有「連線」按鈕
+        document.querySelectorAll(".connect-btn").forEach(btn => {
+          btn.addEventListener("click", e => {
+            const targetIp = e.target.getAttribute("data-ip");
+            const map = e.currentTarget.getAttribute("data-map") || "default";
+            if (targetIp) {
+              window.location.href = `agv.html?ip=${encodeURIComponent(targetIp)}&map=${encodeURIComponent(map)}`;
+
+            }
+          });
+        });
+
+
       } else {
         agvList.innerHTML = "<div class='agv-row'><div class='col'>沒有找到 AGV</div></div>";
       }
