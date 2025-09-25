@@ -1,0 +1,63 @@
+import socket, struct, json
+
+STATUS_PORT = 19204
+CONNECT_TIMEOUT = 1
+MSGTYPE_INFO = 1000  # robot_status_info_req
+
+#搜尋網段用
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def _send_recv(ip: str, port: int, msg_type: int, body: dict | None = None, timeout: int = CONNECT_TIMEOUT):
+    body_bytes = b""
+    if body:
+        body_json = json.dumps(body, separators=(',', ':')).encode("utf-8")
+        body_bytes = body_json
+
+    header = struct.pack(
+        ">BBH I H 6s",
+        0x5A, 0x01, 1, len(body_bytes), msg_type, b"\x00"*6
+    )
+    packet = header + body_bytes
+
+    with socket.create_connection((ip, port), timeout=timeout) as s:
+        s.sendall(packet)
+        data = s.recv(4096)
+
+    json_str = data.split(b"{", 1)[-1]
+    json_str = b"{" + json_str
+    return json.loads(json_str.decode("utf-8"))
+
+class Api:
+    def get_robot_info(self, ip: str):
+        try:
+            resp = _send_recv(ip, STATUS_PORT, MSGTYPE_INFO)
+            return {"ok": True, "resp": resp}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+        
+
+    #
+    def scan_network(self, subnet: str, max_workers: int = 20):
+        """
+        掃描一整個網段，使用多執行緒加快速度
+        """
+        ips = [f"{subnet}.{i}" for i in range(1, 255)]
+        results = []
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_ip = {executor.submit(self.get_robot_info, ip): ip for ip in ips}
+
+            for future in as_completed(future_to_ip):
+                ip = future_to_ip[future]
+                try:
+                    res = future.result()
+                    if res.get("ok"):
+                        results.append({
+                            "ip": ip,
+                            "vehicle_id": res["resp"].get("vehicle_id", "未知ID"),
+                            "model": res["resp"].get("model", "未知型號"),
+                            "map": res["resp"].get("current_map", "未知地圖")
+                        })
+                except Exception:
+                    pass
+        return results
