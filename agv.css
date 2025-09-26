@@ -25,6 +25,13 @@ h1 { margin-bottom: 20px; }
 }
 
 
+/* 給動作按鈕之間加間距 */
+.btn.action-btn {
+  margin-right: 8px;   /* 按鈕右邊留 8px 空間 */
+  margin-bottom: 6px;  /* 每列按鈕之間也留一點 */
+}
+
+
 
 /* === 小視窗 Modal 樣式 === */
 .modal {

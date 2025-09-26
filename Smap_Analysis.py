@@ -88,7 +88,7 @@ if __name__ == "__main__":
     for point, bin_dict in bins_actions.items():
         print(f"站點 {point}:")
         for bin_name, actions in bin_dict.items():
-            print(f"  庫位 {bin_name} → 動作 {actions}")
+            print(f"  庫位 {bin_name} ： 動作 {actions}")
 
     print("\n=== 前置點分析 ===")
     for ap, lm in prepoints.items():

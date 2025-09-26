@@ -3,28 +3,31 @@ let taskCounter = 0;
 
 function waitPywebviewApi(timeout = 5000) {
   return new Promise((resolve) => {
-    if (window.pywebview && window.pywebview.api) {
-      return resolve(window.pywebview.api);
-    }
-    const onReady = () => resolve(window.pywebview.api);
-    window.addEventListener('pywebviewready', onReady, { once: true });
-
     let elapsed = 0;
-    const t = setInterval(() => {
-      if (window.pywebview && window.pywebview.api) {
-        clearInterval(t);
-        window.removeEventListener('pywebviewready', onReady);
+    const checkReady = () => {
+      if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.get_bins === "function") {
         resolve(window.pywebview.api);
+        return true;
       }
-      elapsed += 50;
-      if (elapsed >= timeout) {
+      return false;
+    };
+
+    if (checkReady()) return;
+
+    const t = setInterval(() => {
+      if (checkReady()) {
         clearInterval(t);
-        window.removeEventListener('pywebviewready', onReady);
-        resolve(null);
+      } else {
+        elapsed += 50;
+        if (elapsed >= timeout) {
+          clearInterval(t);
+          resolve(null);
+        }
       }
     }, 50);
   });
 }
+
 
 // === 任務管理 ===
 function addTask(bin, action, buttonEl) {
@@ -149,7 +152,7 @@ window.addEventListener("DOMContentLoaded", async () => {
           div.className = "bin";
 
           const titleSpan = document.createElement("span");
-          titleSpan.innerText = `庫位 ${binName} → `;
+          titleSpan.innerText = `庫位 ${binName} ： `;
           div.appendChild(titleSpan);
 
           (actions || []).forEach(action => {
@@ -188,7 +191,7 @@ async function pollStatus(ip) {
   try {
     // === 查詢任務狀態 ===
     const res = await window.pywebview.api.get_task_status(ip);
-    console.log("get_task_status 回傳：", res);
+    //console.log("get_task_status 回傳：", res);
 
     if (res && res.ok) {
       const pkg = res.resp.task_status_package || {};
@@ -224,7 +227,7 @@ async function pollStatus(ip) {
       const curMap = mapRes.resp.current_map || "";
       const curMd5 = mapRes.resp.current_map_md5 || "";
 
-      console.log("[MAP] 當前地圖:", curMap, "MD5:", curMd5, "URL:", urlMap, urlMd5);
+      //console.log("[MAP] 當前地圖:", curMap, "MD5:", curMd5, "URL:", urlMap, urlMd5);
 
       if (curMap !== urlMap || (urlMd5 && curMd5 && curMd5 !== urlMd5)) {
         showRefreshButton(curMap, curMd5);
