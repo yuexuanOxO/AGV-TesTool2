@@ -11,7 +11,8 @@ MSGTYPE_DOWNLOADMAP = 0x0FAB   # 4011 robot_config_downloadmap_req
 #搜尋網段用
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-def _send_recv(ip: str, port: int, msg_type: int, body: dict | None = None, timeout: int = CONNECT_TIMEOUT):
+def _send_recv(ip: str, port: int, msg_type: int, body: dict | None = None, 
+               timeout: int = CONNECT_TIMEOUT, read_all: bool = False):
     body_bytes = b""
     if body:
         body_json = json.dumps(body, separators=(',', ':')).encode("utf-8")
@@ -25,11 +26,24 @@ def _send_recv(ip: str, port: int, msg_type: int, body: dict | None = None, time
 
     with socket.create_connection((ip, port), timeout=timeout) as s:
         s.sendall(packet)
-        data = s.recv(4096)
+
+        if read_all:
+            # 讀完整資料直到 socket 關閉
+            chunks = []
+            while True:
+                chunk = s.recv(4096)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+            data = b"".join(chunks)
+        else:
+            # 只收一次就結束（適合狀態查詢）
+            data = s.recv(4096)
 
     json_str = data.split(b"{", 1)[-1]
     json_str = b"{" + json_str
     return json.loads(json_str.decode("utf-8"))
+
 
 class Api:
     def get_robot_info(self, ip: str):
@@ -69,7 +83,7 @@ class Api:
 
     def download_map(self, ip: str, map_name: str = "default"):
         try:
-            resp = _send_recv(ip, CONFIG_PORT, MSGTYPE_DOWNLOADMAP, {"map_name": map_name})
+            resp = _send_recv(ip, CONFIG_PORT, MSGTYPE_DOWNLOADMAP, {"map_name": map_name}, read_all=True)
             return {"ok": True, "map": resp}
         except Exception as e:
             return {"ok": False, "error": str(e)}

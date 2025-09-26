@@ -38,7 +38,7 @@ window.addEventListener("DOMContentLoaded", () => {
             <div class="col model">${info.model}</div>
             <div class="col map">${info.map}</div>
             <div class="col action">
-            <button class="btn connect-btn" data-ip="${info.ip}">連線</button>
+            <button class="btn connect-btn" data-ip="${info.ip}" data-map="${info.map}">連線</button>
             </div>
           `;
           agvList.appendChild(row);
