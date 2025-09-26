@@ -47,14 +47,14 @@ function showTaskModal() {
   // 若已存在 modal，先移除
   closeModal();
 
-  const list = taskQueue.map(t => `${t.order}. ${t.id} → ${t.binTask}`).join("<br>");
   const html = `
     <div id="taskModal" class="modal">
       <div class="modal-content">
-        <h3>確認任務清單</h3>
-        <div>${list}</div>
-        <button class="btn-confirm" onclick="startQueue()">✅ 確認無誤，執行任務</button>
-        <button class="btn-cancel" onclick="closeModal()">❌ 關閉</button>
+        <h3>是否下發當前執行順序的任務？</h3>
+        <div style="margin-top:10px; text-align:center;">
+          <button class="btn-confirm" onclick="startQueue()">✅ 確認下發</button>
+          <button class="btn-cancel" onclick="closeModal()">❌ 取消</button>
+        </div>
       </div>
     </div>
   `;
@@ -111,6 +111,7 @@ function pollUntilComplete(ip) {
 
 // === 主程式 ===
 window.addEventListener("DOMContentLoaded", async () => {
+  updateSidebar();
   const params = new URLSearchParams(location.search);
   const ip = params.get("ip") || "未知 IP";
   const mapName = params.get("map") || "default";
@@ -220,3 +221,78 @@ async function pollStatus(ip) {
 
   setTimeout(() => pollStatus(ip), 2000);
 }
+
+
+
+// === 側邊欄任務清單 ===
+function addTask(bin, action, buttonEl) {
+  taskCounter++;
+  taskQueue.push({ id: bin, binTask: action, order: taskCounter });
+  updateSidebar();
+}
+
+function removeTask(order) {
+  taskQueue = taskQueue.filter(t => t.order !== order);
+  updateSidebar();
+}
+
+function updateSidebar() {
+  const sidebar = document.getElementById("taskSidebar");
+  if (!sidebar) return;
+
+  if (taskQueue.length === 0) {
+    sidebar.innerHTML = "<h3>任務執行順序⬇</h3><p style='font-size:12px; color:#9ca3af;'>尚未選擇任務</p>";
+    return;
+  }
+
+  let html = "<h3>任務執行順序⬇</h3>";
+  taskQueue.forEach(t => {
+    html += `
+      <div class="task-item">
+        <span>${t.id}:${t.binTask}</span>
+        <button onclick="removeTask(${t.order})">❌</button>
+      </div>
+    `;
+  });
+
+
+  // ⬇️ 新增清空全部按鈕
+  html += `
+    <div style="text-align:center; margin-top:10px;">
+      <button class="btn-clearall" onclick="clearAllTasks()">🗑 清空全部</button>
+    </div>
+  `;
+
+
+  sidebar.innerHTML = html;
+}
+
+
+function clearAllTasks() {
+  // 若已存在 modal，先移除
+  closeModal();
+
+  const html = `
+    <div id="taskModal" class="modal">
+      <div class="modal-content">
+        <h3>是否清除當前所有執行動作？</h3>
+        <div style="margin-top:10px; text-align:center;">
+          <button class="btn-confirm" onclick="confirmClearAll()">✅ 確定清除</button>
+          <button class="btn-cancel" onclick="closeModal()">❌ 取消</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", html);
+}
+
+function confirmClearAll() {
+  taskQueue = [];
+  taskCounter = 0;
+  updateSidebar();
+  closeModal();
+}
+
+
+window.removeTask = removeTask;
+window.clearAllTasks = clearAllTasks;
