@@ -123272,7 +123272,7 @@
             {
               "key": "binTask",
               "type": "json",
-              "stringValue": "[\n    {\n        \"Unload\": {\n            \"operation\": \"JackUnload\",\n            \"recognize\": false\n        }\n    },\n    {\n        \"Load\": {\n            \"operation\": \"JackLoad\"\n        }\n    }\n]\n"
+              "stringValue": "[\n    {\n        \"Unload\": {\n            \"operation\": \"JackUnload\",\n            \"recognize\": false\n        }\n    },\n    {\n        \"Load\": {\n            \"operation\": \"JackLoad\"\n        }\n    },\n    {\n        \"OxO\": {\n            \"operation\": \"JackLoad\"\n        }\n    }\n]\n"
             }
           ]
         }
@@ -123794,7 +123794,7 @@
             {
               "key": "points",
               "type": "json",
-              "stringValue": "[{\"x\":7.466911750563513,\"y\":3.3867219215020485},{\"x\":7.766911750563513,\"y\":3.3867219215020485},{\"x\":7.766911750563513,\"y\":3.686721921502049},{\"x\":7.466911750563513,\"y\":3.686721921502049}]"
+              "stringValue": "[{\"x\":7.4670000000000005,\"y\":3.387},{\"x\":7.767,\"y\":3.387},{\"x\":7.767,\"y\":3.687},{\"x\":7.4670000000000005,\"y\":3.687}]"
             },
             {
               "key": "binTask",

@@ -186,6 +186,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 async function pollStatus(ip) {
   try {
+    // === 查詢任務狀態 ===
     const res = await window.pywebview.api.get_task_status(ip);
     console.log("get_task_status 回傳：", res);
 
@@ -204,7 +205,6 @@ async function pollStatus(ip) {
         6: "CANCELED"
       };
 
-      // 只更新對應的 span，不會閃整段
       document.getElementById("navStatus").innerText =
         latest ? stateMap[latest.status] || latest.status : "NONE";
       document.getElementById("taskState").innerText =
@@ -213,6 +213,24 @@ async function pollStatus(ip) {
       document.getElementById("navStatus").innerText = "ERROR";
       document.getElementById("taskState").innerText = "-";
     }
+
+    // === 查詢當前地圖 ===
+    const params = new URLSearchParams(location.search);
+    const urlMap = params.get("map") || "";
+    const urlMd5 = params.get("md5") || "";
+
+    const mapRes = await window.pywebview.api.get_current_map(ip);
+    if (mapRes && mapRes.ok) {
+      const curMap = mapRes.resp.current_map || "";
+      const curMd5 = mapRes.resp.current_map_md5 || "";
+
+      console.log("[MAP] 當前地圖:", curMap, "MD5:", curMd5, "URL:", urlMap, urlMd5);
+
+      if (curMap !== urlMap || (urlMd5 && curMd5 && curMd5 !== urlMd5)) {
+        showRefreshButton(curMap, curMd5);
+      }
+    }
+
   } catch (err) {
     console.error("pollStatus 錯誤:", err);
     document.getElementById("navStatus").innerText = "錯誤";
@@ -221,6 +239,7 @@ async function pollStatus(ip) {
 
   setTimeout(() => pollStatus(ip), 2000);
 }
+
 
 
 
@@ -296,3 +315,25 @@ function confirmClearAll() {
 
 window.removeTask = removeTask;
 window.clearAllTasks = clearAllTasks;
+
+//地圖變更偵測跳出的刷新按鈕
+function showRefreshButton(newMap, newMd5) {
+  if (document.getElementById("refreshBtn")) return;
+
+  const btn = document.createElement("button");
+  btn.id = "refreshBtn";
+  btn.innerText = "⚠️ 地圖已變更，請刷新庫位 ⚠️";
+
+  btn.addEventListener("click", () => {
+    const params = new URLSearchParams(location.search);
+    if (newMap) params.set("map", newMap);
+    if (newMd5) params.set("md5", newMd5);
+    location.search = params.toString(); // 用新的參數刷新頁面
+  });
+
+  document.body.appendChild(btn);
+}
+
+
+
+

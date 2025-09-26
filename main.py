@@ -4,6 +4,9 @@ from agv_api import Api
 api = Api()
 
 class Bridge:
+    def __init__(self):
+        self.api = Api()
+    
     def get_robot_info(self, ip: str):
         return api.get_robot_info(ip)
     
@@ -21,6 +24,14 @@ class Bridge:
     
     def dispatch_task(self, ip: str, bin_name: str, action: str, source_id: str = "SELF_POSITION"):
         return api.dispatch_task(ip, bin_name, action, source_id)
+    
+    '''
+    def get_map_md5(self, ip, map_name):
+        return self.api.get_map_md5(ip, map_name)
+    '''
+    
+    def get_current_map(self, ip):
+        return self.api.get_current_map(ip)
         
 
 if __name__ == "__main__":

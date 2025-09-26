@@ -18,6 +18,7 @@ MSGTYPE_DOWNLOADMAP = 0x0FAB  # robot_config_downloadmap_req
 MSGTYPE_NAV_STATUS = 0x03FC   # 1020
 MSGTYPE_TASK_STATUS = 0x0456  # 1110
 MSGTYPE_GOTARGET = 0x0BEB  # 3051 robot_task_gotarget_req
+MSGTYPE_MAP_REQ = 0x0514  # robot_status_map_req 查询机器人载入的地图以及储存的地图
 
 
 
@@ -76,6 +77,7 @@ class Api:
         except Exception as e:
             return {"ok": False, "error": str(e)}
 
+    # 掃描區網內的 AGV
     def scan_network(self, subnet: str, max_workers: int = 100):
         ips = [f"{subnet}.{i}" for i in range(1, 255)]
         results = []
@@ -99,6 +101,7 @@ class Api:
                     pass
         return results
 
+    # 下載地圖
     def download_map(self, ip: str, map_name: str = "default"):
         try:
             resp = _send_recv(ip, CONFIG_PORT, MSGTYPE_DOWNLOADMAP,
@@ -107,6 +110,7 @@ class Api:
         except Exception as e:
             return {"ok": False, "error": f"下載地圖失敗：{e}"}
 
+    # 帶有 md5 判斷與快取的 get_bins
     def get_bins(self, ip: str, map_name: str = "default", md5: str = "", force_refresh: bool = False):
         """帶有 md5 判斷與快取的 get_bins"""
         cache_json = os.path.join(CACHE_DIR, f"{map_name}.json")
@@ -163,7 +167,7 @@ class Api:
             return {"ok": False, "error": str(e)}
         
 
-
+    #下發任務
     def dispatch_task(self, ip: str, bin_name: str, action: str, source_id: str = "SELF_POSITION"):
         if not ip:
             return {"ok": False, "error": "缺少 IP"}
@@ -181,5 +185,31 @@ class Api:
             print("下發任務:", body)
             resp = _send_recv(ip, TASK_PORT, MSGTYPE_GOTARGET, body, timeout=3)
             return {"ok": True, "resp": resp, "task_id": task_id}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+        
+
+
+    #獲取地圖md5
+    '''
+    def get_map_md5(self, ip: str, map_name: str):
+        try:
+            body = {"map_names": [map_name]}
+            resp = _send_recv(ip, STATUS_PORT, 0x0516, body, CONNECT_TIMEOUT)
+            return {"ok": True, "resp": resp}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+    '''
+        
+
+    def get_current_map(self, ip: str):
+        """
+        查詢當前載入的地圖與 md5
+        """
+        if not ip:
+            return {"ok": False, "error": "缺少 IP"}
+        try:
+            resp = _send_recv(ip, STATUS_PORT, MSGTYPE_MAP_REQ, {}, CONNECT_TIMEOUT)
+            return {"ok": True, "resp": resp}
         except Exception as e:
             return {"ok": False, "error": str(e)}
