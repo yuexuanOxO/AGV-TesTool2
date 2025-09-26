@@ -123272,7 +123272,7 @@
             {
               "key": "binTask",
               "type": "json",
-              "stringValue": "[\n    {\n        \"Unload\": {\n            \"operation\": \"JackUnload\",\n            \"recognize\": false\n        }\n    },\n    {\n        \"Load\": {\n            \"operation\": \"JackLoad\",\n            \"recfile\": \"shelf/aviron.shelf\",\n            \"recognize\": true\n        }\n    }\n]\n"
+              "stringValue": "[\n    {\n        \"Unload\": {\n            \"operation\": \"JackUnload\",\n            \"recognize\": false\n        }\n    },\n    {\n        \"Load\": {\n            \"operation\": \"JackLoad\",\n            \"recfile\": \"shelf/aviron.shelf\",\n            \"recognize\": true\n        }\n    },\n    {\n        \"OxO\": {\n            \"operation\": \"JackLoad\",\n            \"recfile\": \"shelf/aviron.shelf\",\n            \"recognize\": true\n        }\n    }\n]\n"
             }
           ]
         }
@@ -123284,6 +123284,7 @@
           "className": "GeneralLocation",
           "instanceName": "C",
           "groupName": "C",
+          "pointName": "AP3",
           "pos": {
             "x": 4.822,
             "y": 3.347

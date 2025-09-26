@@ -1,15 +1,11 @@
-// agv.js
 function waitPywebviewApi(timeout = 5000) {
   return new Promise((resolve) => {
-    // 已就緒
     if (window.pywebview && window.pywebview.api) {
       return resolve(window.pywebview.api);
     }
-    // 事件版（pywebview 會在注入完成後觸發）
     const onReady = () => resolve(window.pywebview.api);
     window.addEventListener('pywebviewready', onReady, { once: true });
 
-    // 安全保險：輪詢 + 超時
     let elapsed = 0;
     const t = setInterval(() => {
       if (window.pywebview && window.pywebview.api) {
@@ -32,7 +28,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   const ip = params.get("ip") || "未知 IP";
   const mapName = params.get("map") || "default";
   const md5 = params.get("md5") || "";
-  
 
   const title = document.getElementById("title");
   const binsWrap = document.getElementById("binsWrap");
@@ -64,7 +59,25 @@ window.addEventListener("DOMContentLoaded", async () => {
         Object.entries(binDict || {}).forEach(([binName, actions]) => {
           const div = document.createElement("div");
           div.className = "bin";
-          div.innerText = `庫位 ${binName} → 動作 ${Array.isArray(actions) ? actions.join(", ") : ""}`;
+
+          // 顯示庫位名稱
+          const titleSpan = document.createElement("span");
+          titleSpan.innerText = `庫位 ${binName} → `;
+          div.appendChild(titleSpan);
+
+          // 把每個動作變成按鈕
+          (actions || []).forEach(action => {
+            const btn = document.createElement("button");
+            btn.className = "btn action-btn";
+            btn.innerText = action;
+            btn.addEventListener("click", () => {
+              alert(`點擊了 ${binName} 的 ${action} 動作`);
+              // TODO: 之後改成呼叫下發任務 API
+              // 例如：window.pywebview.api.dispatch_task(ip, binName, action);
+            });
+            div.appendChild(btn);
+          });
+
           section.appendChild(div);
         });
 
