@@ -98,7 +98,7 @@ def parse_prepoints(smap):
 
 # ---------- 主程式 ----------
 if __name__ == "__main__":
-    smap = load_smap("AGV_map2.json")  # 你的檔案
+    smap = load_smap("AGV_map2.txt")  # 你的檔案
     #points = parse_points(smap)
     bins   = parse_bins(smap)
     bins_actions = parse_bins_actions(smap)

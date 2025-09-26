@@ -123256,7 +123256,7 @@
       "binLocationList": [
         {
           "className": "GeneralLocation",
-          "instanceName": "B",
+          "instanceName": "B1",
           "groupName": "B",
           "pointName": "AP1",
           "pos": {
@@ -123272,7 +123272,7 @@
             {
               "key": "binTask",
               "type": "json",
-              "stringValue": "[\n    {\n        \"Unload\": {\n            \"operation\": \"JackUnload\",\n            \"recognize\": false\n        }\n    },\n    {\n        \"Load\": {\n            \"operation\": \"JackLoad\",\n            \"recfile\": \"shelf/aviron.shelf\",\n            \"recognize\": true\n        }\n    },\n    {\n        \"OxO\": {\n            \"operation\": \"JackLoad\",\n            \"recfile\": \"shelf/aviron.shelf\",\n            \"recognize\": true\n        }\n    }\n]\n"
+              "stringValue": "[\n    {\n        \"Unload\": {\n            \"operation\": \"JackUnload\",\n            \"recognize\": false\n        }\n    },\n    {\n        \"Load\": {\n            \"operation\": \"JackLoad\"\n        }\n    }\n]\n"
             }
           ]
         }
@@ -123282,7 +123282,7 @@
       "binLocationList": [
         {
           "className": "GeneralLocation",
-          "instanceName": "C",
+          "instanceName": "C1",
           "groupName": "C",
           "pointName": "AP3",
           "pos": {
@@ -123298,7 +123298,7 @@
             {
               "key": "binTask",
               "type": "json",
-              "stringValue": "[\n    {\n        \"Load\": {\n            \"operation\": \"JackLoad\",\n            \"recfile\": \"shelf/aviron.shelf\",\n            \"recognize\": true\n        }\n    },\n    {\n        \"Unload\": {\n            \"operation\": \"JackUnload\",\n            \"recognize\": false\n        }\n    }\n]\n"
+              "stringValue": "[\n    {\n        \"Load\": {\n            \"operation\": \"JackLoad\"\n        }\n    },\n    {\n        \"Unload\": {\n            \"operation\": \"JackUnload\",\n            \"recognize\": false\n        }\n    }\n]\n"
             }
           ]
         }
@@ -123769,6 +123769,32 @@
               "key": "points",
               "type": "json",
               "stringValue": "[{\"x\":27.746,\"y\":3.438999999999999},{\"x\":28.046,\"y\":3.438999999999999},{\"x\":28.046,\"y\":3.7390000000000003},{\"x\":27.746,\"y\":3.7390000000000003}]"
+            },
+            {
+              "key": "binTask",
+              "type": "json",
+              "stringValue": "[\n    {\n        \"Load\": {\n            \"operation\": \"JackLoad\"\n        }\n    },\n    {\n        \"Unload\": {\n            \"operation\": \"JackUnload\",\n            \"recognize\": false\n        }\n    }\n]\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "binLocationList": [
+        {
+          "className": "GeneralLocation",
+          "instanceName": "A1",
+          "groupName": "A",
+          "pointName": "LM18",
+          "pos": {
+            "x": 7.617,
+            "y": 3.537
+          },
+          "property": [
+            {
+              "key": "points",
+              "type": "json",
+              "stringValue": "[{\"x\":7.466911750563513,\"y\":3.3867219215020485},{\"x\":7.766911750563513,\"y\":3.3867219215020485},{\"x\":7.766911750563513,\"y\":3.686721921502049},{\"x\":7.466911750563513,\"y\":3.686721921502049}]"
             },
             {
               "key": "binTask",

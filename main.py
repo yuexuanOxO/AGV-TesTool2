@@ -12,6 +12,15 @@ class Bridge:
     
     def get_bins(self, ip: str, map_name: str = "default", md5: str = "", force_refresh: bool = False):
         return api.get_bins(ip, map_name, md5, force_refresh)
+    
+    def get_nav_status(self, ip: str, simple: bool = True):
+        return api.get_nav_status(ip, simple)
+
+    def get_task_status(self, ip: str, task_ids: list[str] = None):
+        return api.get_task_status(ip, task_ids)
+    
+    def dispatch_task(self, ip: str, bin_name: str, action: str, source_id: str = "SELF_POSITION"):
+        return api.dispatch_task(ip, bin_name, action, source_id)
         
 
 if __name__ == "__main__":
