@@ -10,8 +10,8 @@ class Bridge:
     def scan_network(self, subnet: str):
         return api.scan_network(subnet)
     
-    def get_bins(self, ip: str, map_name: str = "default"):
-        return api.get_bins(ip, map_name)
+    def get_bins(self, ip: str, map_name: str = "default", md5: str = "", force_refresh: bool = False):
+        return api.get_bins(ip, map_name, md5, force_refresh)
         
 
 if __name__ == "__main__":

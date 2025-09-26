@@ -1,50 +1,60 @@
-import socket, struct, json
-import Smap_Analysis #自製的解析庫位模組
+import socket, struct, json, os
+import Smap_Analysis
 
 STATUS_PORT = 19204
 CONFIG_PORT = 19207
+CONNECT_TIMEOUT = 5  # 給長一點，避免大地圖 timeout
 
-CONNECT_TIMEOUT = 1
-MSGTYPE_INFO = 1000  # robot_status_info_req
-MSGTYPE_DOWNLOADMAP = 0x0FAB   # 4011 robot_config_downloadmap_req
+MSGTYPE_INFO = 1000       # robot_status_info_req
+MSGTYPE_DOWNLOADMAP = 0x0FAB  # robot_config_downloadmap_req
 
-#搜尋網段用
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-def _send_recv(ip: str, port: int, msg_type: int, body: dict | None = None, 
-               timeout: int = CONNECT_TIMEOUT, read_all: bool = False):
-    body_bytes = b""
-    if body:
-        body_json = json.dumps(body, separators=(',', ':')).encode("utf-8")
-        body_bytes = body_json
+CACHE_DIR = "maps_cache"
+os.makedirs(CACHE_DIR, exist_ok=True)
 
-    header = struct.pack(
+
+# === 封包處理 ===
+def _pack_header(seq: int, msg_type: int, body_bytes: bytes) -> bytes:
+    return struct.pack(
         ">BBH I H 6s",
-        0x5A, 0x01, 1, len(body_bytes), msg_type, b"\x00"*6
-    )
-    packet = header + body_bytes
-
-    with socket.create_connection((ip, port), timeout=timeout) as s:
-        s.sendall(packet)
-
-        if read_all:
-            # 讀完整資料直到 socket 關閉
-            chunks = []
-            while True:
-                chunk = s.recv(4096)
-                if not chunk:
-                    break
-                chunks.append(chunk)
-            data = b"".join(chunks)
-        else:
-            # 只收一次就結束（適合狀態查詢）
-            data = s.recv(4096)
-
-    json_str = data.split(b"{", 1)[-1]
-    json_str = b"{" + json_str
-    return json.loads(json_str.decode("utf-8"))
+        0x5A, 0x01, seq, len(body_bytes), msg_type, b"\x00"*6
+    ) + body_bytes
 
 
+def _read_frame(sock: socket.socket):
+    # 先收 header (16 bytes)
+    header = sock.recv(16)
+    if len(header) < 16:
+        raise Exception("回應 header 不完整")
+
+    magic, version, seq, json_len, msg_type, _ = struct.unpack(">BBH I H 6s", header)
+
+    # 再收 json_len bytes
+    body = b""
+    while len(body) < json_len:
+        chunk = sock.recv(json_len - len(body))
+        if not chunk:
+            break
+        body += chunk
+    return magic, msg_type, body
+
+
+def _send_recv(ip: str, port: int, msg_type: int, body: dict | None = None, timeout=CONNECT_TIMEOUT):
+    body_bytes = b""
+    if body is not None:
+        body_bytes = json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(timeout)
+        s.connect((ip, port))
+        s.sendall(_pack_header(1, msg_type, body_bytes))
+        _, _, resp = _read_frame(s)
+
+    return json.loads(resp.decode("utf-8") or "{}")
+
+
+# === API 類別 ===
 class Api:
     def get_robot_info(self, ip: str):
         try:
@@ -52,13 +62,8 @@ class Api:
             return {"ok": True, "resp": resp}
         except Exception as e:
             return {"ok": False, "error": str(e)}
-        
 
-    #
     def scan_network(self, subnet: str, max_workers: int = 20):
-        """
-        掃描一整個網段，使用多執行緒加快速度
-        """
         ips = [f"{subnet}.{i}" for i in range(1, 255)]
         results = []
 
@@ -74,24 +79,54 @@ class Api:
                             "ip": ip,
                             "vehicle_id": res["resp"].get("vehicle_id", "未知ID"),
                             "model": res["resp"].get("model", "未知型號"),
-                            "map": res["resp"].get("current_map", "未知地圖")
+                            "map": res["resp"].get("current_map", "未知地圖"),
+                            "map_md5": (res["resp"].get("current_map_entries") or [{}])[0].get("md5", "")
                         })
                 except Exception:
                     pass
         return results
 
-
     def download_map(self, ip: str, map_name: str = "default"):
         try:
-            resp = _send_recv(ip, CONFIG_PORT, MSGTYPE_DOWNLOADMAP, {"map_name": map_name}, read_all=True)
+            resp = _send_recv(ip, CONFIG_PORT, MSGTYPE_DOWNLOADMAP,
+                              {"map_name": map_name}, timeout=10)
             return {"ok": True, "map": resp}
         except Exception as e:
-            return {"ok": False, "error": str(e)}
+            return {"ok": False, "error": f"下載地圖失敗：{e}"}
 
-    def get_bins(self, ip: str, map_name: str = "default"):
+    def get_bins(self, ip: str, map_name: str = "default", md5: str = "", force_refresh: bool = False):
+        """帶有 md5 判斷與快取的 get_bins"""
+        cache_json = os.path.join(CACHE_DIR, f"{map_name}.json")
+        cache_md5 = os.path.join(CACHE_DIR, f"{map_name}.md5")
+
+        # 先檢查快取
+        if not force_refresh and os.path.exists(cache_json) and os.path.exists(cache_md5):
+            try:
+                with open(cache_md5, "r", encoding="utf-8") as f:
+                    cached_md5 = f.read().strip()
+                if md5 and cached_md5 == md5:
+                    with open(cache_json, "r", encoding="utf-8") as f:
+                        smap = json.load(f)
+                    bins = Smap_Analysis.parse_bins_actions(smap)
+                    return {"ok": True, "bins": bins, "source": "cache"}
+            except Exception:
+                pass
+
+        # 沒有快取或 md5 不符 → 下載
         res = self.download_map(ip, map_name)
         if not res.get("ok"):
             return res
         smap = res["map"]
+
+        # 更新快取
+        try:
+            with open(cache_json, "w", encoding="utf-8") as f:
+                json.dump(smap, f, ensure_ascii=False, indent=2)
+            if md5:
+                with open(cache_md5, "w", encoding="utf-8") as f:
+                    f.write(md5)
+        except Exception:
+            pass
+
         bins = Smap_Analysis.parse_bins_actions(smap)
-        return {"ok": True, "bins": bins}
+        return {"ok": True, "bins": bins, "source": "download"}

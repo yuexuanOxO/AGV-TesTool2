@@ -38,7 +38,10 @@ window.addEventListener("DOMContentLoaded", () => {
             <div class="col model">${info.model}</div>
             <div class="col map">${info.map}</div>
             <div class="col action">
-            <button class="btn connect-btn" data-ip="${info.ip}" data-map="${info.map}">連線</button>
+              <button class="btn connect-btn" 
+                      data-ip="${info.ip}" 
+                      data-map="${info.map}" 
+                      data-md5="${info.map_md5 || ''}">連線</button>
             </div>
           `;
           agvList.appendChild(row);
@@ -49,8 +52,9 @@ window.addEventListener("DOMContentLoaded", () => {
           btn.addEventListener("click", e => {
             const targetIp = e.target.getAttribute("data-ip");
             const map = e.currentTarget.getAttribute("data-map") || "default";
+            const md5 = e.currentTarget.getAttribute("data-md5") || "";
             if (targetIp) {
-              window.location.href = `agv.html?ip=${encodeURIComponent(targetIp)}&map=${encodeURIComponent(map)}`;
+              window.location.href = `agv.html?ip=${encodeURIComponent(targetIp)}&map=${encodeURIComponent(map)}&md5=${encodeURIComponent(md5)}`;
 
             }
           });

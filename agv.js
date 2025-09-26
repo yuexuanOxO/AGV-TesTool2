@@ -31,6 +31,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(location.search);
   const ip = params.get("ip") || "未知 IP";
   const mapName = params.get("map") || "default";
+  const md5 = params.get("md5") || "";
+  
 
   const title = document.getElementById("title");
   const binsWrap = document.getElementById("binsWrap");
@@ -43,7 +45,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const res = await api.get_bins(ip, mapName);
+    const res = await api.get_bins(ip, mapName, md5, false);
     if (res && res.ok) {
       const bins = res.bins || {};
       binsWrap.innerHTML = "";
