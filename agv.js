@@ -44,13 +44,18 @@ function showTaskModal() {
     return;
   }
 
+  // 若已存在 modal，先移除
+  closeModal();
+
   const list = taskQueue.map(t => `${t.order}. ${t.id} → ${t.binTask}`).join("<br>");
   const html = `
     <div id="taskModal" class="modal">
-      <h3>確認任務清單</h3>
-      <div>${list}</div>
-      <button onclick="startQueue()">✅ 確認無誤，執行任務</button>
-      <button onclick="closeModal()">❌ 關閉</button>
+      <div class="modal-content">
+        <h3>確認任務清單</h3>
+        <div>${list}</div>
+        <button class="btn-confirm" onclick="startQueue()">✅ 確認無誤，執行任務</button>
+        <button class="btn-cancel" onclick="closeModal()">❌ 關閉</button>
+      </div>
     </div>
   `;
   document.body.insertAdjacentHTML("beforeend", html);
