@@ -116,6 +116,8 @@ class Api:
         cache_json = os.path.join(CACHE_DIR, f"{map_name}.json")
         cache_md5 = os.path.join(CACHE_DIR, f"{map_name}.md5")
 
+        smap = None
+
         # 先檢查快取
         if not force_refresh and os.path.exists(cache_json) and os.path.exists(cache_md5):
             try:
@@ -124,29 +126,42 @@ class Api:
                 if md5 and cached_md5 == md5:
                     with open(cache_json, "r", encoding="utf-8") as f:
                         smap = json.load(f)
-                    bins = Smap_Analysis.parse_bins_actions(smap)
-                    return {"ok": True, "bins": bins, "source": "cache"}
             except Exception:
                 pass
 
         # 沒有快取或 md5 不符 → 下載
-        res = self.download_map(ip, map_name)
-        if not res.get("ok"):
-            return res
-        smap = res["map"]
+        if smap is None:
+            res = self.download_map(ip, map_name)
+            if not res.get("ok"):
+                return res
+            smap = res["map"]
 
-        # 更新快取
-        try:
-            with open(cache_json, "w", encoding="utf-8") as f:
-                json.dump(smap, f, ensure_ascii=False, indent=2)
-            if md5:
-                with open(cache_md5, "w", encoding="utf-8") as f:
-                    f.write(md5)
-        except Exception:
-            pass
+            # 更新快取
+            try:
+                with open(cache_json, "w", encoding="utf-8") as f:
+                    json.dump(smap, f, ensure_ascii=False, indent=2)
+                if md5:
+                    with open(cache_md5, "w", encoding="utf-8") as f:
+                        f.write(md5)
+            except Exception:
+                pass
 
+            source = "download"
+        else:
+            source = "cache"
+
+        # === 這裡同時回傳 bins + stations + points ===
         bins = Smap_Analysis.parse_bins_actions(smap)
-        return {"ok": True, "bins": bins, "source": "download"}
+        points = Smap_Analysis.parse_points(smap)
+
+        return {
+            "ok": True,
+            "bins": bins,
+            "stations": list(points.keys()),  # ✅ 所有站點名稱 (AP/LM/PP/CP)
+            "points": points,                 # ✅ 詳細資訊 (class, x, y)
+            "source": source
+        }
+
     
     #獲取機器人導航狀態
     def get_nav_status(self, ip: str, simple: bool = True):

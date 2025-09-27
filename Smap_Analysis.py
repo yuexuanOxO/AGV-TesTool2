@@ -70,6 +70,25 @@ def parse_prepoints(smap):
     return prepoints
 
 
+def parse_points(smap):
+    """
+    回傳所有站點資訊 dict
+    格式: { "LM6": {"class": "LocationMark", "x": 9.294, "y": -7.954}, ... }
+    """
+    points = {}
+    for p in smap.get("advancedPointList", []):
+        name = p.get("instanceName")
+        pos = p.get("pos", {})
+        if name and "x" in pos and "y" in pos:
+            points[name] = {
+                "class": p.get("className", ""),
+                "x": float(pos["x"]),
+                "y": float(pos["y"]),
+            }
+    return points
+
+
+
 # ---------- 測試用 ----------
 if __name__ == "__main__":
     import sys

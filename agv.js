@@ -93,6 +93,7 @@ function startQueue() {
   closeModal();
 }
 
+// 輪詢直到任務完成
 function pollUntilComplete(ip) {
   const interval = setInterval(() => {
     window.pywebview.api.get_task_status(ip).then(statusRes => {
@@ -130,6 +131,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  // === 取得庫位資訊 ===
   try {
     const res = await api.get_bins(ip, mapName, md5, false);
     if (res && res.ok) {
@@ -184,9 +186,67 @@ window.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     binsWrap.innerText = "錯誤：" + err;
   }
+
+
+    // === 折返點控制 ===
+  const enableChk = document.getElementById("enableReturnPoint");
+  const inputBox = document.getElementById("returnPointInput");
+  const selectBox = document.getElementById("returnPointSelect");
+
+  let allStations = []; // 由地圖解析取得所有站點
+  try {
+    const resMap = await api.get_bins(ip, mapName, md5, false);
+    if (resMap && resMap.ok) {
+      allStations = resMap.stations || [];
+    }
+  } catch (err) {
+    console.warn("取得站點清單失敗:", err);
+  }
+
+  enableChk.addEventListener("change", () => {
+    if (enableChk.checked) {
+      inputBox.style.display = "inline-block";
+      selectBox.style.display = "inline-block";
+      refreshDropdown(allStations);
+    } else {
+      inputBox.style.display = "none";
+      selectBox.style.display = "none";
+    }
+  });
+
+  inputBox.addEventListener("input", () => {
+    const keyword = inputBox.value.trim().toUpperCase();
+    const filtered = allStations.filter(s => s.toUpperCase().includes(keyword));
+    refreshDropdown(filtered);
+  });
+
+  selectBox.addEventListener("change", () => {
+    inputBox.value = selectBox.value;
+  });
+
+  function refreshDropdown(list) {
+    selectBox.innerHTML = "";
+    if (list.length === 0) {
+      alert("此站點不存在");
+      inputBox.value = "";
+      return;
+    }
+    list.forEach(st => {
+      const opt = document.createElement("option");
+      opt.value = st;
+      opt.innerText = st;
+      selectBox.appendChild(opt);
+    });
+    if (list.length === 1) {
+      inputBox.value = list[0];
+    }
+  }
+
+
 });
 
 
+// 輪詢任務狀態與地圖變更
 async function pollStatus(ip) {
   try {
     // === 查詢任務狀態 ===
@@ -336,6 +396,7 @@ function showRefreshButton(newMap, newMd5) {
 
   document.body.appendChild(btn);
 }
+
 
 
 
