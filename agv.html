@@ -19,9 +19,10 @@
       <label>
         <input type="checkbox" id="enableReturnPoint"> 啟用折返點
       </label>
-      <input type="text" id="returnPointInput" placeholder="輸入站點名稱" style="display:none; margin-left:10px;">
-      <select id="returnPointSelect" style="display:none; margin-left:10px;"></select>
+      <input id="returnPointInput" list="stationList" placeholder="輸入或選擇站點" style="display:none; margin-left:10px; width:180px;">
+      <datalist id="stationList"></datalist>
     </div>
+
   </div>
   <div id="binsWrap">載入中...</div>
   <div id="taskSidebar"></div>

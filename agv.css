@@ -168,3 +168,16 @@ h1 { margin-bottom: 20px; }
   from { opacity: 0; transform: translate(-50%, -40%); }
   to   { opacity: 1; transform: translate(-50%, -50%); }
 }
+
+
+/* === 折返點控制樣式 === */
+#returnPointInput {
+  width: 200px;         /* 你想要的寬度 */
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+/* 讓 datalist 下拉選單跟輸入框一樣寬 (針對部分瀏覽器) */
+#stationList option {
+  width: 100%;
+}

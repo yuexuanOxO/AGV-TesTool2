@@ -25,11 +25,6 @@ class Bridge:
     def dispatch_task(self, ip: str, bin_name: str, action: str, source_id: str = "SELF_POSITION"):
         return api.dispatch_task(ip, bin_name, action, source_id)
     
-    '''
-    def get_map_md5(self, ip, map_name):
-        return self.api.get_map_md5(ip, map_name)
-    '''
-    
     def get_current_map(self, ip):
         return self.api.get_current_map(ip)
         

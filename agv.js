@@ -189,58 +189,48 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 
     // === 折返點控制 ===
-  const enableChk = document.getElementById("enableReturnPoint");
-  const inputBox = document.getElementById("returnPointInput");
-  const selectBox = document.getElementById("returnPointSelect");
+    const enableChk = document.getElementById("enableReturnPoint");
+    const inputBox = document.getElementById("returnPointInput");
+    const dataList = document.getElementById("stationList");
 
-  let allStations = []; // 由地圖解析取得所有站點
-  try {
-    const resMap = await api.get_bins(ip, mapName, md5, false);
-    if (resMap && resMap.ok) {
-      allStations = resMap.stations || [];
+    let allStations = []; // 從後端取得的站點清單
+
+    try {
+      const resMap = await api.get_bins(ip, mapName, md5, false);
+      if (resMap && resMap.ok) {
+        allStations = resMap.stations || [];  // ✅ 包含 AP / LM / PP / CP
+      }
+    } catch (err) {
+      console.warn("取得站點清單失敗:", err);
     }
-  } catch (err) {
-    console.warn("取得站點清單失敗:", err);
-  }
 
-  enableChk.addEventListener("change", () => {
-    if (enableChk.checked) {
-      inputBox.style.display = "inline-block";
-      selectBox.style.display = "inline-block";
-      refreshDropdown(allStations);
-    } else {
-      inputBox.style.display = "none";
-      selectBox.style.display = "none";
-    }
-  });
-
-  inputBox.addEventListener("input", () => {
-    const keyword = inputBox.value.trim().toUpperCase();
-    const filtered = allStations.filter(s => s.toUpperCase().includes(keyword));
-    refreshDropdown(filtered);
-  });
-
-  selectBox.addEventListener("change", () => {
-    inputBox.value = selectBox.value;
-  });
-
-  function refreshDropdown(list) {
-    selectBox.innerHTML = "";
-    if (list.length === 0) {
-      alert("此站點不存在");
-      inputBox.value = "";
-      return;
-    }
-    list.forEach(st => {
-      const opt = document.createElement("option");
-      opt.value = st;
-      opt.innerText = st;
-      selectBox.appendChild(opt);
+    enableChk.addEventListener("change", () => {
+      if (enableChk.checked) {
+        inputBox.style.display = "inline-block";
+        refreshDropdown(allStations);
+      } else {
+        inputBox.style.display = "none";
+      }
     });
-    if (list.length === 1) {
-      inputBox.value = list[0];
+
+    inputBox.addEventListener("change", () => {
+      const val = inputBox.value.trim();
+      if (val && !allStations.includes(val)) {
+        alert("此站點不存在");
+        inputBox.value = "";
+      }
+    });
+
+    function refreshDropdown(list) {
+      dataList.innerHTML = "";
+      list.forEach(st => {
+        const opt = document.createElement("option");
+        opt.value = st;
+        dataList.appendChild(opt);
+      });
     }
-  }
+
+
 
 
 });
