@@ -3,6 +3,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const btnFetch = document.getElementById("btnFetch");
   const agvList = document.getElementById("agvList");
 
+  // ✅ 讓 Enter 鍵觸發「取得狀態」按鈕
+  ipInput.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      btnFetch.click();
+    }
+  });
+
   btnFetch.addEventListener("click", async () => {
     const ip = ipInput.value.trim();
     if (!ip) return;

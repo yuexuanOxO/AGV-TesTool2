@@ -1,30 +1,49 @@
-    body { font-family: Arial, sans-serif; background: #0f172a; color: white; }
-    .row { margin: 10px; }
-    .btn {
-      padding: 6px 12px;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+body { font-family: Arial, sans-serif; background: #0f172a; color: white; }
+.row { margin: 10px; }
+.btn {
+  padding: 6px 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
-    .agv-row {
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      border-bottom: 1px solid #1e293b;
-    }
-    .agv-row.header {
-      font-weight: bold;
-      background: #1e293b;
-    }
-    .col {
-      flex: 1;
-      padding: 0 10px;
-    }
-    .col.ip { flex: 1.5; }
-    .col.id { flex: 1; }
-    .col.model { flex: 2; }
-    .col.map { flex: 1.5; }
-    .col.action { flex: 1; text-align: right; }
+.agv-row {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #1e293b;
+}
+.agv-row.header {
+  font-weight: bold;
+  background: #1e293b;
+}
+.col {
+  flex: 1;
+  padding: 0 10px;
+}
+.col.ip { flex: 1.5; }
+.col.id { flex: 1; }
+.col.model { flex: 2; }
+.col.map { flex: 1.5; }
+.col.action { flex: 1; text-align: right; }
+
+
+#ipInput {
+  height: 36px;        /* 跟按鈕同高 */
+  padding: 6px 10px;   /* 內距避免文字太擠 */
+  font-size: 14px;
+  box-sizing: border-box;
+  vertical-align: middle;  /* 與按鈕垂直對齊 */
+  border-radius: 6px;     /* ✅ 圓角 */
+  border: 1px solid #ccc; /* ✅ 邊框顏色 (可調整) */
+}
+
+#btnFetch {
+  height: 36px;
+  padding: 6px 12px;
+  font-size: 14px;
+  vertical-align: middle;
+  border-radius: 6px;     /* ✅ 按鈕也加圓角，保持一致 */
+}

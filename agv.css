@@ -1,5 +1,14 @@
-body { font-family: Arial, sans-serif; background: #0f172a; color: white; padding: 20px; }
-h1 { margin-bottom: 20px; }
+body { 
+  font-family: Arial,sans-serif; 
+  background: #0f172a;
+  color: white; 
+  padding: 20px; 
+}
+
+h1 { 
+  margin-bottom: 20px; 
+}
+
 .btn {
     padding: 6px 12px;
     background: #2563eb;
@@ -30,7 +39,6 @@ h1 { margin-bottom: 20px; }
   margin-right: 8px;   /* 按鈕右邊留 8px 空間 */
   margin-bottom: 6px;  /* 每列按鈕之間也留一點 */
 }
-
 
 
 /* === 小視窗 Modal 樣式 === */
